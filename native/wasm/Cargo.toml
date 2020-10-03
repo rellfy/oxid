@@ -1,0 +1,10 @@
+[package]
+name = "oxid-wasm"
+version = "2020.1.0"
+authors = ["Lorenzo Fontoura <lorenzo@nioel.com>"]
+edition = "2018"
+license = "MIT"
+description = """
+WASM rendering module for oxid.
+"""
+homepage = "https://github.com/rellfy/oxid"

@@ -1,0 +1,20 @@
+[package]
+name = "oxid"
+version = "2020.1.0"
+authors = ["Lorenzo Fontoura <lorenzo@nioel.com>"]
+edition = "2018"
+license = "MIT"
+homepage = "https://github.com/rellfy/oxid"
+repository = "https://github.com/rellfy/oxid"
+description = "WASM input and rendering library"
+readme = "README.md"
+
+[features]
+default = []
+
+[target.wasm32-unknown-unknown.dependencies]
+oxid-wasm = { path = "native/wasm", version = "=2020.1.0" }
+
+[dev-dependencies]
+glam = {version = "0.8", features = ["scalar-math"] }
+quad-rand = "0.1"
