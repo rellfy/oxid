@@ -20,7 +20,16 @@
 </head>
 <body>
     <canvas id="glcanvas" tabindex='1'></canvas>
-    <script src="gl.js"></script>
-    <script>load("post_processing.wasm");</script>
+    <script src="https://rellfy.com/rwasm.js"></script>
+    <script src="/native/wasm/js/gl.js"></script>
+    <script src="/native/wasm/js/oxid.js"></script>
+    <script>
+        const path = "/target/wasm32-unknown-unknown/release/examples/quad.wasm";
+        const wasm = new RWASM(path, {}, window.oxidImportObject);
+
+        wasm.on("load", () => {
+            setOxidWasmInstance(wasm.instance);
+        });
+    </script>
 </body>
 </html>
