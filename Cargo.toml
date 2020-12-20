@@ -18,3 +18,6 @@ oxid-wasm = { path = "native/wasm", version = "=2020.1.0" }
 [dev-dependencies]
 glam = {version = "0.8", features = ["scalar-math"] }
 quad-rand = "0.1"
+
+[dependencies]
+rwasm = "2020.1.1"
