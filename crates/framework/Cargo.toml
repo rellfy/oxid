@@ -1,19 +1,39 @@
 [package]
 name = "oxid_framework"
-version = "2021.0.1"
-authors = ["Lorenzo Fontoura <lorenzo@nioel.com>"]
+version = "0.1.0"
+authors = [
+    "Lorenzo Fontoura <lorenzo@nioel.com>",
+    "not-fl3 <not.fl3@gmail.com>"
+]
 edition = "2018"
 license = "MIT"
 homepage = "https://github.com/rellfy/oxid"
 repository = "https://github.com/rellfy/oxid"
 description = "oxid framework"
+readme="README.md"
 exclude = ["examples"]
 publish = false
 
+[features]
+default = []
+
+[package.metadata.docs.rs]
+all-features = true
+
 [dependencies]
 oxid_core = { path = "../core" }
-rwasm = "2020.1.1"
+quad-rand = "0.1"
+glam = {version = "0.10", features = ["scalar-math"] }
+image = { version = "0.22", default-features = false, features = ["png_codec", "tga"] }
+oxid_framework_macro = { path = "macro" }
+fontdue = "0.4.0"
 
 [dev-dependencies]
-glam = {version = "0.8", features = ["scalar-math"] }
-quad-rand = "0.1"
+megaui-macroquad = "0.1.3"
+physics-platformer = { path = "./physics-platformer" }
+oxid_framework_tiled = { path = "./tiled" }
+
+# workaround to fix the examples
+# this allows to use megaui-framework in examples without two versions of framework
+[patch.crates-io]
+oxid_framework = { path = './' }
