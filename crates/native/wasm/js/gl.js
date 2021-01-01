@@ -817,6 +817,43 @@ window.oxidImportObject.env = {
             GL.textures[id] = null;
         }
     },
+    glGenQueries: function (n, ids) {
+        _glGenObject(n, ids, 'createQuery', GL.timerQueries, 'glGenQueries');
+    },
+    glDeleteQueries: function (n, ids) {
+        for (var i = 0; i < n; i++) {
+            var id = getArray(textures + i * 4, Uint32Array, 1)[0];
+            var query = GL.timerQueries[id];
+            if (!query) {
+                continue;
+            }
+            gl.deleteQuery(query);
+            query.name = 0;
+            GL.timerQueries[id] = null;
+        }
+    },
+    glBeginQuery: function (target, id) {
+        GL.validateGLObjectID(GL.timerQueries, id, 'glBeginQuery', 'id');
+        gl.beginQuery(target, GL.timerQueries[id]);
+    },
+    glEndQuery: function (target) {
+        gl.endQuery(target);
+    },
+    glGetQueryObjectiv: function (id, pname, ptr) {
+        GL.validateGLObjectID(GL.timerQueries, id, 'glGetQueryObjectiv', 'id');
+        let result = gl.getQueryObject(GL.timerQueries[id], pname);
+        getArray(ptr, Uint32Array, 1)[0] = result;
+    },
+    glGetQueryObjectui64v: function (id, pname, ptr) {
+        GL.validateGLObjectID(GL.timerQueries, id, 'glGetQueryObjectui64v', 'id');
+        let result = gl.getQueryObject(GL.timerQueries[id], pname);
+        let heap = getArray(ptr, Uint32Array, 2);
+        heap[0] = result;
+        heap[1] = (result - heap[0])/4294967296;
+    },
+    glCopyTexImage2D: function (target, level, internalformat, x, y, width, height, border) {
+        gl.copyTexImage2D(target, level, internalformat, x, y, width, height, border);
+    },
     init_opengl: function (ptr) {
         window.oxidOpenGlInitHook();
         window.requestAnimationFrame(animation);
@@ -833,12 +870,13 @@ window.oxidImportObject.env = {
                 var uInt8Array = new Uint8Array(this.response);
 
                 FS.loaded_files[file_id] = uInt8Array;
-                oxidWasmInstanceExports.exports.file_loaded(file_id);
+                console.log("here, exports: ", oxidWasmInstanceExports);
+                oxidWasmInstanceExports.file_loaded(file_id);
             }
         }
         xhr.onerror = function (e) {
             FS.loaded_files[file_id] = null;
-            oxidWasmInstanceExports.exports.file_loaded(file_id);
+            oxidWasmInstanceExports.file_loaded(file_id);
         };
 
         xhr.send();

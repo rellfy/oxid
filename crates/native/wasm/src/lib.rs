@@ -1,7 +1,7 @@
 #![allow(non_snake_case, non_camel_case_types, non_upper_case_globals)]
 
 pub mod fs;
-mod gl;
+pub mod gl;
 mod rand;
 
 pub use gl::*;
@@ -327,6 +327,8 @@ extern "C" {
     /// Notice that this function will works only from "engaging" event callbacks - from
     /// "mouse_down"/"key_down" event handler functions.
     pub fn oxid_set_cursor_grab(grab: bool);
+
+    pub fn oxid_is_elapsed_timer_supported() -> bool;
 }
 
 /// Do nothing on wasm - cursor will be hidden by "oxid_set_cursor_grab" anyway.
