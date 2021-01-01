@@ -14,18 +14,20 @@ pub use event::*;
 
 pub use graphics::*;
 
+pub use oxid::gl;
+
 use std::ffi::CString;
 
 #[deprecated(
-    since = "0.3",
-    note = "libc rand is slow and incosistent across platforms. Please use quad-rnd crate instead."
+since = "0.3",
+note = "libc rand is slow and incosistent across platforms. Please use quad-rnd crate instead."
 )]
 pub unsafe fn rand() -> i32 {
     oxid::rand()
 }
 #[deprecated(
-    since = "0.3",
-    note = "libc rand is slow and incosistent across platforms. Please use quad-rnd crate instead."
+since = "0.3",
+note = "libc rand is slow and incosistent across platforms. Please use quad-rnd crate instead."
 )]
 pub const RAND_MAX: u32 = oxid::RAND_MAX;
 
@@ -54,7 +56,7 @@ impl Context {
     pub fn quit(&self) {
         // its not possible to quit wasm anyway
         #[cfg(not(target_arch = "wasm32"))]
-        unsafe {
+            unsafe {
             oxid::oxid_quit();
         }
     }
@@ -67,7 +69,7 @@ impl Context {
     pub fn request_quit(&self) {
         // its not possible to quit wasm anyway
         #[cfg(not(target_arch = "wasm32"))]
-        unsafe {
+            unsafe {
             oxid::oxid_request_quit();
         }
     }
@@ -80,7 +82,7 @@ impl Context {
     pub fn cancel_quit(&self) {
         // its not possible to quit wasm anyway
         #[cfg(not(target_arch = "wasm32"))]
-        unsafe {
+            unsafe {
             oxid::oxid_cancel_quit();
         }
     }
@@ -93,7 +95,7 @@ impl Context {
     /// TODO: implement window focus events
     pub fn set_cursor_grab(&self, grab: bool) {
         #[cfg(not(target_os = "ios"))]
-        unsafe {
+            unsafe {
             oxid::oxid_set_cursor_grab(grab);
         }
     }
@@ -294,8 +296,8 @@ extern "C" fn event(event: *const oxid::oxid_event, user_data: *mut ::std::os::r
 /// }
 /// ```
 pub fn start<F>(conf: conf::Conf, f: F)
-where
-    F: 'static + FnOnce(Context) -> UserData,
+    where
+        F: 'static + FnOnce(Context) -> UserData,
 {
     let mut desc: oxid::oxid_desc = unsafe { std::mem::zeroed() };
 

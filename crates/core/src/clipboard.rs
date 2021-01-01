@@ -2,8 +2,8 @@
 
 use crate::Context;
 
-#[cfg(target_os = "linux")]
-mod linux {
+#[cfg(all(target_os = "linux", feature = "oxid-linux"))]
+mod linux_x11 {
     use crate::Context;
 
     pub fn get(_ctx: &mut Context) -> Option<String> {
@@ -39,7 +39,24 @@ mod wasm {
     }
 }
 
-#[cfg(not(any(target_os = "linux", target_arch = "wasm32")))]
+#[cfg(target_os = "windows")]
+mod windows {
+    use crate::Context;
+
+    pub fn get(_ctx: &mut Context) -> Option<String> {
+        unsafe { oxid_windows::clipboard::get_clipboard_text() }
+    }
+
+    pub fn set(_ctx: &mut Context, data: &str) {
+        unsafe { oxid_windows::clipboard::set_clipboard_text(data) };
+    }
+}
+
+#[cfg(not(any(
+all(target_os = "linux", feature = "oxid-linux"),
+target_os = "windows",
+target_arch = "wasm32"
+)))]
 mod dummy {
     use crate::Context;
 
@@ -50,13 +67,18 @@ mod dummy {
     pub fn set(_ctx: &mut Context, _data: &str) {}
 }
 
-#[cfg(not(any(target_os = "linux", target_arch = "wasm32")))]
+#[cfg(not(any(
+all(target_os = "linux", feature = "oxid-linux"),
+target_os = "windows",
+target_arch = "wasm32"
+)))]
 use dummy as clipboard;
+#[cfg(all(target_os = "linux", feature = "oxid-linux"))]
+use linux_x11 as clipboard;
 #[cfg(target_arch = "wasm32")]
 use wasm as clipboard;
-
-#[cfg(target_os = "linux")]
-use linux as clipboard;
+#[cfg(target_os = "windows")]
+use windows as clipboard;
 
 /// Get current OS clipboard value
 pub fn get(ctx: &mut Context) -> Option<String> {

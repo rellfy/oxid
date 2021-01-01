@@ -8,101 +8,123 @@ use std::{error::Error, fmt::Display};
 
 pub use texture::{FilterMode, Texture, TextureAccess, TextureFormat, TextureParams, TextureWrap};
 
-fn get_uniform_location(program: GLuint, name: &str) -> i32 {
+fn get_uniform_location(program: GLuint, name: &str) -> Option<i32> {
     let cname = CString::new(name).unwrap_or_else(|e| panic!(e));
     let location = unsafe { glGetUniformLocation(program, cname.as_ptr()) };
 
-    assert!(
-        location != -1,
-        format!("Cant get \"{}\" uniform location", name)
-    );
+    if location == -1 {
+        return None;
+    }
 
-    location
+    Some(location)
 }
 
 #[derive(Clone, Copy, Debug)]
 pub enum UniformType {
+    /// One 32-bit wide float (equivalent to `f32`)
     Float1,
+    /// Two 32-bit wide floats (equivalent to `[f32; 2]`)
     Float2,
+    /// Three 32-bit wide floats (equivalent to `[f32; 3]`)
     Float3,
+    /// Four 32-bit wide floats (equivalent to `[f32; 4]`)
     Float4,
+    /// One unsigned 32-bit integers (equivalent to `[u32; 1]`)
     Int1,
+    /// Two unsigned 32-bit integers (equivalent to `[u32; 2]`)
     Int2,
+    /// Three unsigned 32-bit integers (equivalent to `[u32; 3]`)
     Int3,
+    /// Four unsigned 32-bit integers (equivalent to `[u32; 4]`)
     Int4,
+    /// Four by four matrix of 32-bit floats
     Mat4,
 }
 
 impl UniformType {
-    fn size(&self, count: usize) -> usize {
+    /// Byte size for a given UniformType
+    pub fn size(&self) -> usize {
         match self {
-            UniformType::Float1 => 4 * count,
-            UniformType::Float2 => 8 * count,
-            UniformType::Float3 => 12 * count,
-            UniformType::Float4 => 16 * count,
-            UniformType::Int1 => 4 * count,
-            UniformType::Int2 => 8 * count,
-            UniformType::Int3 => 12 * count,
-            UniformType::Int4 => 16 * count,
-            UniformType::Mat4 => 64 * count,
+            UniformType::Float1 => 4,
+            UniformType::Float2 => 8,
+            UniformType::Float3 => 12,
+            UniformType::Float4 => 16,
+            UniformType::Int1 => 4,
+            UniformType::Int2 => 8,
+            UniformType::Int3 => 12,
+            UniformType::Int4 => 16,
+            UniformType::Mat4 => 64,
         }
     }
 }
 
 pub struct UniformDesc {
-    name: &'static str,
+    name: String,
     uniform_type: UniformType,
     array_count: usize,
 }
 
 pub struct UniformBlockLayout {
-    pub uniforms: &'static [UniformDesc],
+    pub uniforms: Vec<UniformDesc>,
 }
 
 impl UniformDesc {
-    pub const fn new(name: &'static str, uniform_type: UniformType) -> UniformDesc {
+    pub fn new(name: &str, uniform_type: UniformType) -> UniformDesc {
         UniformDesc {
-            name,
+            name: name.to_string(),
             uniform_type,
             array_count: 1,
         }
     }
-    pub const fn with_array(
-        name: &'static str,
-        uniform_type: UniformType,
-        array_count: usize,
-    ) -> UniformDesc {
+
+    pub fn array(self, array_count: usize) -> UniformDesc {
         UniformDesc {
-            name,
-            uniform_type,
             array_count,
+            ..self
         }
     }
 }
 
 pub struct ShaderMeta {
     pub uniforms: UniformBlockLayout,
-    pub images: &'static [&'static str],
+    pub images: Vec<String>,
 }
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum VertexFormat {
+    /// One 32-bit wide float (equivalent to `f32`)
     Float1,
+    /// Two 32-bit wide floats (equivalent to `[f32; 2]`)
     Float2,
+    /// Three 32-bit wide floats (equivalent to `[f32; 3]`)
     Float3,
+    /// Four 32-bit wide floats (equivalent to `[f32; 4]`)
     Float4,
+    /// One unsigned 8-bit integer (equivalent to `u8`)
     Byte1,
+    /// Two unsigned 8-bit integers (equivalent to `[u8; 2]`)
     Byte2,
+    /// Three unsigned 8-bit integers (equivalent to `[u8; 3]`)
     Byte3,
+    /// Four unsigned 8-bit integers (equivalent to `[u8; 4]`)
     Byte4,
+    /// One unsigned 16-bit integer (equivalent to `u16`)
     Short1,
+    /// Two unsigned 16-bit integers (equivalent to `[u16; 2]`)
     Short2,
+    /// Tree unsigned 16-bit integers (equivalent to `[u16; 3]`)
     Short3,
+    /// Four unsigned 16-bit integers (equivalent to `[u16; 4]`)
     Short4,
+    /// One unsigned 32-bit integers (equivalent to `[u32; 1]`)
     Int1,
+    /// Two unsigned 32-bit integers (equivalent to `[u32; 2]`)
     Int2,
+    /// Three unsigned 32-bit integers (equivalent to `[u32; 3]`)
     Int3,
+    /// Four unsigned 32-bit integers (equivalent to `[u32; 4]`)
     Int4,
+    /// Four by four matrix of 32-bit floats
     Mat4,
 }
 
@@ -285,13 +307,15 @@ impl Shader {
     }
 }
 
+type UniformLocation = Option<GLint>;
+
 pub struct ShaderImage {
-    gl_loc: GLint,
+    gl_loc: UniformLocation,
 }
 
 #[derive(Debug)]
 pub struct ShaderUniform {
-    gl_loc: GLint,
+    gl_loc: UniformLocation,
     offset: usize,
     size: usize,
     uniform_type: UniformType,
@@ -738,8 +762,9 @@ impl Context {
         if self.cache.color_blend == color_blend && self.cache.alpha_blend == alpha_blend {
             return;
         }
+
         unsafe {
-            if let Some(blend) = color_blend {
+            if let Some(color_blend) = color_blend {
                 if self.cache.color_blend.is_none() {
                     glEnable(GL_BLEND);
                 }
@@ -748,13 +773,13 @@ impl Context {
                     equation: eq_rgb,
                     sfactor: src_rgb,
                     dfactor: dst_rgb,
-                } = blend;
+                } = color_blend;
 
                 if let Some(BlendState {
-                    equation: eq_alpha,
-                    sfactor: src_alpha,
-                    dfactor: dst_alpha,
-                }) = alpha_blend
+                                equation: eq_alpha,
+                                sfactor: src_alpha,
+                                dfactor: dst_alpha,
+                            }) = alpha_blend
                 {
                     glBlendFuncSeparate(
                         src_rgb.into(),
@@ -767,7 +792,7 @@ impl Context {
                     glBlendFunc(src_rgb.into(), dst_rgb.into());
                     glBlendEquationSeparate(eq_rgb.into(), eq_rgb.into());
                 }
-            } else if self.cache.alpha_blend.is_some() {
+            } else if self.cache.color_blend.is_some() {
                 glDisable(GL_BLEND);
             }
         }
@@ -823,6 +848,16 @@ impl Context {
         self.cache.stencil = stencil_test;
     }
 
+    /// Set a new viewport rectangle.
+    /// Should be applied after begin_pass.
+    pub fn apply_viewport(&mut self, x: i32, y: i32, w: i32, h: i32) {
+        unsafe {
+            glViewport(x, y, w, h);
+        }
+    }
+
+    /// Set a new scissor rectangle.
+    /// Should be applied after begin_pass.
     pub fn apply_scissor_rect(&mut self, x: i32, y: i32, w: i32, h: i32) {
         unsafe {
             glScissor(x, y, w, h);
@@ -838,9 +873,11 @@ impl Context {
                 .images
                 .get(n)
                 .unwrap_or_else(|| panic!("Image count in bindings and shader did not match!"));
-            unsafe {
-                self.cache.bind_texture(n, bindings_image.texture);
-                glUniform1i(shader_image.gl_loc, n as i32);
+            if let Some(gl_loc) = shader_image.gl_loc {
+                unsafe {
+                    self.cache.bind_texture(n, bindings_image.texture);
+                    glUniform1i(gl_loc, n as i32);
+                }
             }
         }
 
@@ -854,7 +891,7 @@ impl Context {
 
             let pip_attribute = pip.layout.get(attr_index).copied();
 
-            if let Some(attribute) = pip_attribute {
+            if let Some(Some(attribute)) = pip_attribute {
                 let vb = bindings.vertex_buffers[attribute.buffer_index];
 
                 if cached_attr.map_or(true, |cached_attr| {
@@ -902,7 +939,7 @@ impl Context {
             use UniformType::*;
 
             assert!(
-                offset <= std::mem::size_of::<U>() - uniform.uniform_type.size(1) / 4,
+                offset <= std::mem::size_of::<U>() - uniform.uniform_type.size() / 4,
                 "Uniforms struct does not match shader uniforms layout"
             );
 
@@ -910,37 +947,39 @@ impl Context {
                 let data = (uniforms as *const _ as *const f32).offset(offset as isize);
                 let data_int = (uniforms as *const _ as *const i32).offset(offset as isize);
 
-                match uniform.uniform_type {
-                    Float1 => {
-                        glUniform1fv(uniform.gl_loc, uniform.array_count, data);
-                    }
-                    Float2 => {
-                        glUniform2fv(uniform.gl_loc, uniform.array_count, data);
-                    }
-                    Float3 => {
-                        glUniform3fv(uniform.gl_loc, uniform.array_count, data);
-                    }
-                    Float4 => {
-                        glUniform4fv(uniform.gl_loc, uniform.array_count, data);
-                    }
-                    Int1 => {
-                        glUniform1iv(uniform.gl_loc, uniform.array_count, data_int);
-                    }
-                    Int2 => {
-                        glUniform2iv(uniform.gl_loc, uniform.array_count, data_int);
-                    }
-                    Int3 => {
-                        glUniform3iv(uniform.gl_loc, uniform.array_count, data_int);
-                    }
-                    Int4 => {
-                        glUniform4iv(uniform.gl_loc, uniform.array_count, data_int);
-                    }
-                    Mat4 => {
-                        glUniformMatrix4fv(uniform.gl_loc, uniform.array_count, 0, data);
+                if let Some(gl_loc) = uniform.gl_loc {
+                    match uniform.uniform_type {
+                        Float1 => {
+                            glUniform1fv(gl_loc, uniform.array_count, data);
+                        }
+                        Float2 => {
+                            glUniform2fv(gl_loc, uniform.array_count, data);
+                        }
+                        Float3 => {
+                            glUniform3fv(gl_loc, uniform.array_count, data);
+                        }
+                        Float4 => {
+                            glUniform4fv(gl_loc, uniform.array_count, data);
+                        }
+                        Int1 => {
+                            glUniform1iv(gl_loc, uniform.array_count, data_int);
+                        }
+                        Int2 => {
+                            glUniform2iv(gl_loc, uniform.array_count, data_int);
+                        }
+                        Int3 => {
+                            glUniform3iv(gl_loc, uniform.array_count, data_int);
+                        }
+                        Int4 => {
+                            glUniform4iv(gl_loc, uniform.array_count, data_int);
+                        }
+                        Mat4 => {
+                            glUniformMatrix4fv(gl_loc, uniform.array_count, 0, data);
+                        }
                     }
                 }
             }
-            offset += uniform.uniform_type.size(1) / 4 * uniform.array_count as usize;
+            offset += uniform.uniform_type.size() / 4 * uniform.array_count as usize;
         }
     }
 
@@ -1031,6 +1070,11 @@ impl Context {
         self.cache.clear_texture_bindings();
     }
 
+    /// Draw elements using currently applied bindings and pipeline.
+    ///
+    /// + `base_element` specifies starting offset in `index_buffer`.
+    /// + `num_elements` specifies length of the slice of `index_buffer` to draw.
+    /// + `num_instances` specifies how many instances should be rendered.
     pub fn draw(&self, base_element: i32, num_elements: i32, num_instances: i32) {
         assert!(
             self.cache.cur_pipeline.is_some(),
@@ -1088,20 +1132,20 @@ fn load_shader_internal(
         glUseProgram(program);
 
         #[rustfmt::skip]
-        let images = meta.images.iter().map(|name| ShaderImage {
+            let images = meta.images.iter().map(|name| ShaderImage {
             gl_loc: get_uniform_location(program, name),
         }).collect();
 
         #[rustfmt::skip]
-        let uniforms = meta.uniforms.uniforms.iter().scan(0, |offset, uniform| {
+            let uniforms = meta.uniforms.uniforms.iter().scan(0, |offset, uniform| {
             let res = ShaderUniform {
-                gl_loc: get_uniform_location(program, uniform.name),
+                gl_loc: get_uniform_location(program, &uniform.name),
                 offset: *offset,
-                size: uniform.uniform_type.size(1),
+                size: uniform.uniform_type.size(),
                 uniform_type: uniform.uniform_type,
                 array_count: uniform.array_count as _,
             };
-            *offset += uniform.uniform_type.size(1) * uniform.array_count;
+            *offset += uniform.uniform_type.size() * uniform.array_count;
             Some(res)
         }).collect();
 
@@ -1436,8 +1480,7 @@ impl Pipeline {
             })
             .sum();
 
-        let mut vertex_layout: Vec<VertexAttributeInternal> =
-            vec![VertexAttributeInternal::default(); attributes_len];
+        let mut vertex_layout: Vec<Option<VertexAttributeInternal>> = vec![None; attributes_len];
 
         for VertexAttribute {
             name,
@@ -1452,9 +1495,7 @@ impl Pipeline {
 
             let cname = CString::new(*name).unwrap_or_else(|e| panic!(e));
             let attr_loc = unsafe { glGetAttribLocation(program, cname.as_ptr() as *const _) };
-            if attr_loc == -1 {
-                panic!("failed to obtain location of attribute {}", name);
-            }
+            let attr_loc = if attr_loc == -1 { None } else { Some(attr_loc) };
             let divisor = if layout.step_func == VertexStep::PerVertex {
                 0
             } else {
@@ -1469,36 +1510,33 @@ impl Pipeline {
                 attributes_count = 4;
             }
             for i in 0..attributes_count {
-                let attr_loc = attr_loc as GLuint + i as GLuint;
+                if let Some(attr_loc) = attr_loc {
+                    let attr_loc = attr_loc as GLuint + i as GLuint;
 
-                let attr = VertexAttributeInternal {
-                    attr_loc,
-                    size: format.size(),
-                    type_: format.type_(),
-                    offset: buffer_data.offset,
-                    stride: buffer_data.stride,
-                    buffer_index: *buffer_index,
-                    divisor,
-                };
-                //println!("{}: {:?}", name, attr);
+                    let attr = VertexAttributeInternal {
+                        attr_loc,
+                        size: format.size(),
+                        type_: format.type_(),
+                        offset: buffer_data.offset,
+                        stride: buffer_data.stride,
+                        buffer_index: *buffer_index,
+                        divisor,
+                    };
+                    //println!("{}: {:?}", name, attr);
 
-                assert!(
-                    attr_loc < vertex_layout.len() as u32,
-                    format!(
-                        "attribute: {} outside of allocated attributes array len: {}",
-                        name,
-                        vertex_layout.len()
-                    )
-                );
-                vertex_layout[attr_loc as usize] = attr;
-
+                    assert!(
+                        attr_loc < vertex_layout.len() as u32,
+                        format!(
+                            "attribute: {} outside of allocated attributes array len: {}",
+                            name,
+                            vertex_layout.len()
+                        )
+                    );
+                    vertex_layout[attr_loc as usize] = Some(attr);
+                }
                 buffer_data.offset += format.byte_len() as i64
             }
         }
-
-        // TODO: it should be possible to express a "holes" in the attribute layout in the api
-        // so empty attributes will be fine. But right now empty attribute is always a bug
-        assert!(vertex_layout.iter().any(|attr| attr.size == 0) == false);
 
         let pipeline = PipelineInternal {
             layout: vertex_layout,
@@ -1508,6 +1546,11 @@ impl Pipeline {
 
         ctx.pipelines.push(pipeline);
         Pipeline(ctx.pipelines.len() - 1)
+    }
+
+    pub fn set_blend(&self, ctx: &mut Context, color_blend: Option<BlendState>) {
+        let mut pipeline = &mut ctx.pipelines[self.0];
+        pipeline.params.color_blend = color_blend;
     }
 }
 
@@ -1523,15 +1566,27 @@ struct VertexAttributeInternal {
 }
 
 struct PipelineInternal {
-    layout: Vec<VertexAttributeInternal>,
+    layout: Vec<Option<VertexAttributeInternal>>,
     shader: Shader,
     params: PipelineParams,
 }
 
+/// Geometry bindings
 #[derive(Clone, Debug)]
 pub struct Bindings {
+    /// Vertex buffers. Data contained in the buffer must match layout
+    /// specified in the `Pipeline`.
+    ///
+    /// Most commonly vertex buffer will contain `(x,y,z,w)` coordinates of the
+    /// vertex in 3d space, as well as `(u,v)` coordinates that map the vertex
+    /// to some position in the corresponding `Texture`.
     pub vertex_buffers: Vec<Buffer>,
+    /// Index buffer which instructs the GPU in which order to draw vertices
+    /// from a vertex buffer, with each subsequent 3 indices forming a
+    /// triangle.
     pub index_buffer: Buffer,
+    /// Textures to be used with when drawing the geometry in the fragment
+    /// shader.
     pub images: Vec<Texture>,
 }
 
@@ -1664,5 +1719,137 @@ impl Buffer {
     /// this function is not marked as unsafe
     pub fn delete(&self) {
         unsafe { glDeleteBuffers(1, &self.gl_buf as *const _) }
+    }
+}
+
+/// `ElapsedQuery` is used to measure duration of GPU operations.
+///
+/// Usual timing/profiling methods are difficult apply to GPU workloads as draw calls are submitted
+/// asynchronously effectively hiding execution time of individual operations from the user.
+/// `ElapsedQuery` allows to measure duration of individual rendering operations, as though the time
+/// was measured on GPU rather than CPU side.
+///
+/// The query is created using [`ElapsedQuery::new()`] function.
+/// ```
+/// // initialization
+/// let query = ElapsedQuery::new();
+/// ```
+/// Measurement is performed by calling [`ElapsedQuery::begin_query()`] and
+/// [`ElapsedQuery::end_query()`]
+///
+/// ```
+/// query.begin_query();
+/// // one or multiple calls to oxid::Context::draw()
+/// query.end_query();
+/// ```
+///
+/// Retreival of measured duration is only possible at a later point in time. Often a frame or
+/// couple frames later. Measurement latency can especially be high on WASM/WebGL target.
+///
+/// ```
+/// // couple frames later:
+/// if query.is_available() {
+///   let duration_nanoseconds = query.get_result();
+///   // use/display duration_nanoseconds
+/// }
+/// ```
+///
+/// And during finalization:
+/// ```
+/// // clean-up
+/// query.delete();
+/// ```
+///
+/// It is only possible to measure single query at once.
+///
+/// On OpenGL/WebGL platforms implementation relies on [`EXT_disjoint_timer_query`] extension.
+///
+/// [`EXT_disjoint_timer_query`]: https://www.khronos.org/registry/OpenGL/extensions/EXT/EXT_disjoint_timer_query.txt
+///
+#[derive(Clone, Copy)]
+pub struct ElapsedQuery {
+    gl_query: GLuint,
+}
+
+impl ElapsedQuery {
+    pub fn new() -> ElapsedQuery {
+        ElapsedQuery { gl_query: 0 }
+    }
+
+    /// Submit a beginning of elapsed-time query.
+    ///
+    /// Only a single query can be measured at any moment in time.
+    ///
+    /// Use [`ElapsedQuery::end_query()`] to finish the query and
+    /// [`ElapsedQuery::get_result()`] to read the result when rendering is complete.
+    ///
+    /// The query can be used again after retriving the result.
+    ///
+    /// Implemented as `glBeginQuery(GL_TIME_ELAPSED, ...)` on OpenGL/WebGL platforms.
+    ///
+    /// Use [`ElapsedQuery::is_supported()`] to check if functionality is available and the method can be called.
+    pub fn begin_query(&mut self) {
+        if self.gl_query == 0 {
+            unsafe { glGenQueries(1, &mut self.gl_query) };
+        }
+        unsafe { glBeginQuery(GL_TIME_ELAPSED, self.gl_query) };
+    }
+
+    /// Submit an end of elapsed-time query that can be read later when rendering is complete.
+    ///
+    /// This function is usd in conjunction with [`ElapsedQuery::begin_query()`] and
+    /// [`ElapsedQuery::get_result()`].
+    ///
+    /// Implemented as `glEndQuery(GL_TIME_ELAPSED)` on OpenGL/WebGL platforms.
+    pub fn end_query(&mut self) {
+        unsafe { glEndQuery(GL_TIME_ELAPSED) };
+    }
+
+    /// Retreieve measured duration in nanonseconds.
+    ///
+    /// Note that the result may be ready only couple frames later due to asynchronous nature of GPU
+    /// command submission. Use [`ElapsedQuery::is_available()`] to check if the result is
+    /// available for retrieval.
+    ///
+    /// Use [`ElapsedQuery::is_supported()`] to check if functionality is available and the method can be called.
+    pub fn get_result(&self) -> u64 {
+        let mut time: GLuint64 = 0;
+        assert!(self.gl_query != 0);
+        unsafe { glGetQueryObjectui64v(self.gl_query, GL_QUERY_RESULT, &mut time) };
+        time
+    }
+
+    /// Reports whenever elapsed timer is supported and other methods can be invoked.
+    pub fn is_supported() -> bool {
+        unsafe { oxid_is_elapsed_timer_supported() }
+    }
+
+    /// Reports whenever result of submitted query is available for retrieval with
+    /// [`ElapsedQuery::get_result()`].
+    ///
+    /// Note that the result may be ready only couple frames later due to asynchrnous nature of GPU
+    /// command submission.
+    ///
+    /// Use [`ElapsedQuery::is_supported()`] to check if functionality is available and the method can be called.
+    pub fn is_available(&self) -> bool {
+        let mut available: GLint = 0;
+
+        // begin_query was not called yet
+        if self.gl_query == 0 {
+            return false
+        }
+
+        unsafe { glGetQueryObjectiv(self.gl_query, GL_QUERY_RESULT_AVAILABLE, &mut available) };
+        available != 0
+    }
+
+    /// Delete query.
+    ///
+    /// Note that the query is not deleted automatically when dropped.
+    ///
+    /// Implemented as `glDeleteQueries(...)` on OpenGL/WebGL platforms.
+    pub fn delete(&mut self) {
+        unsafe { glDeleteQueries(1, &mut self.gl_query) }
+        self.gl_query = 0;
     }
 }
