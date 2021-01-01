@@ -870,7 +870,6 @@ window.oxidImportObject.env = {
                 var uInt8Array = new Uint8Array(this.response);
 
                 FS.loaded_files[file_id] = uInt8Array;
-                console.log("here, exports: ", oxidWasmInstanceExports);
                 oxidWasmInstanceExports.file_loaded(file_id);
             }
         }
