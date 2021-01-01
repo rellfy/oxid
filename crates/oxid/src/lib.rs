@@ -1,3 +1,4 @@
 extern crate oxid_core as oxid;
+extern crate oxid_framework as framework;
 pub use oxid::*;
-pub use oxid_framework::*;
+pub use framework;
