@@ -1,0 +1,19 @@
+[package]
+name = "oxid_framework"
+version = "2021.0.1"
+authors = ["Lorenzo Fontoura <lorenzo@nioel.com>"]
+edition = "2018"
+license = "MIT"
+homepage = "https://github.com/rellfy/oxid"
+repository = "https://github.com/rellfy/oxid"
+description = "oxid framework"
+exclude = ["examples"]
+publish = false
+
+[dependencies]
+oxid_core = { path = "../core" }
+rwasm = "2020.1.1"
+
+[dev-dependencies]
+glam = {version = "0.8", features = ["scalar-math"] }
+quad-rand = "0.1"

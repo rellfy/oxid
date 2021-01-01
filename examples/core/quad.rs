@@ -1,3 +1,4 @@
+extern crate oxid_core as oxid;
 use oxid::*;
 
 #[repr(C)]

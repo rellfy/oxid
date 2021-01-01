@@ -1,0 +1,13 @@
+[package]
+name = "oxid"
+version = "2021.0.1"
+authors = ["Lorenzo Fontoura <lorenzo@nioel.com>"]
+edition = "2018"
+license = "MIT"
+homepage = "https://github.com/rellfy/oxid"
+repository = "https://github.com/rellfy/oxid"
+readme = "README.md"
+
+[dependencies]
+oxid_core = { path = "../core" }
+oxid_framework = { path = "../framework" }
