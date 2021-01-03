@@ -34,6 +34,7 @@ pub struct FileError {
 }
 type FileResult<T> = Result<T, FileError>;
 impl std::error::Error for FileError {}
+unsafe impl Send for FileError {}
 impl fmt::Display for FileError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "Couldn't load file {}: {}", self.path, self.kind)
@@ -51,6 +52,7 @@ impl FileError {
 pub struct FileLoadingFuture {
     pub contents: std::rc::Rc<std::cell::RefCell<Option<FileResult<Vec<u8>>>>>,
 }
+unsafe impl Send for FileLoadingFuture {}
 impl Unpin for FileLoadingFuture {}
 impl Future for FileLoadingFuture {
     type Output = FileResult<Vec<u8>>;
