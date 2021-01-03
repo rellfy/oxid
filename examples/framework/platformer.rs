@@ -1,7 +1,6 @@
+use rwasm;
 use oxid_framework::prelude::*;
-
 use oxid_framework_tiled as tiled;
-
 use physics_platformer::*;
 
 struct Player {
@@ -14,10 +13,13 @@ struct Platform {
     speed: f32,
 }
 
-#[oxid_framework::main("Platformer")]
+// #[oxid_framework::main("Platformer")]
+#[rwasm::main]
 async fn main() {
+    rwasm::log("hi!");
     let tileset = load_texture("/examples/framework/tileset.png").await;
     set_texture_filter(tileset, FilterMode::Nearest);
+    rwasm::log("loaded texture!");
 
     let tiled_map_json = load_string("/examples/framework/map.json").await.unwrap();
     let tiled_map = tiled::load_map(&tiled_map_json, &[("tileset.png", tileset)], &[]).unwrap();

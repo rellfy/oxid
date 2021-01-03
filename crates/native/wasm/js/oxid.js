@@ -148,16 +148,14 @@ window.mouse_relative_position = function (clientX, clientY) {
 window.oxidImportObject = window.oxidImportObject ? window.oxidImportObject : {};
 window.oxidImportObject.env = {
     ...window.oxidImportObject.env,
-    env : {
-        oxid_set_clipboard: function(ptr, len) {
-            clipboard = UTF8ToString(ptr, len);
-        },
-        oxid_set_cursor_grab: function (grab) {
-            if (grab) {
-                canvas.requestPointerLock();
-            } else {
-                document.exitPointerLock();
-            }
+    oxid_set_clipboard: function(ptr, len) {
+        clipboard = UTF8ToString(ptr, len);
+    },
+    oxid_set_cursor_grab: function (grab) {
+        if (grab) {
+            canvas.requestPointerLock();
+        } else {
+            document.exitPointerLock();
         }
     }
 };

@@ -68,10 +68,6 @@ pub mod prelude;
 
 pub mod telemetry;
 
-// TODO: write something about framework entrypoint
-#[doc(hidden)]
-pub use oxid_framework_macro::main;
-
 /// Cross platform random generator.
 pub mod rand {
     pub use quad_rand::*;
