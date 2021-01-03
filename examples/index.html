@@ -1,8 +1,6 @@
 <!doctype html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="utf-8">
-    <title>TITLE</title>
     <style>
         html,
         body,
@@ -19,12 +17,12 @@
     </style>
 </head>
 <body>
-    <canvas id="glcanvas" tabindex='1'></canvas>
+    <canvas id="glcanvas" tabindex="1"></canvas>
     <script src="https://rellfy.com/rwasm.js"></script>
-    <script src="/native/wasm/js/gl.js"></script>
-    <script src="/native/wasm/js/oxid.js"></script>
+    <script src="/crates/native/wasm/js/gl.js"></script>
+    <script src="/crates/native/wasm/js/oxid.js"></script>
     <script>
-        const path = "/target/wasm32-unknown-unknown/release/examples/quad.wasm";
+        const path = "/target/wasm32-unknown-unknown/release/examples/platformer.wasm";
         const wasm = new RWASM(path, {}, window.oxidImportObject);
 
         wasm.on("load", () => {
