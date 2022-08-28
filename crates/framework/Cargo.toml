@@ -29,7 +29,6 @@ fontdue = "0.4.0"
 rwasm = { git = "https://github.com/rellfy/rwasm", branch = "master" }
 
 [dev-dependencies]
-megaui-macroquad = "0.1.3"
 physics-platformer = { path = "./physics-platformer" }
 oxid_framework_tiled = { path = "./tiled" }
 
