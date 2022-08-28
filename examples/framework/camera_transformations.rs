@@ -17,8 +17,12 @@ fn draw_cross(x: f32, y: f32, color: Color) {
     draw_line(x, y - size, x, y + size, thickness, color);
 }
 
-#[oxid_framework::main("Camera")]
+#[rwasm::main]
 async fn main() {
+    oxid_framework::Window::new("camera_transformations", render());
+}
+
+async fn render() {
     let mut target = (0., 0.);
     let mut zoom = 1.0;
     let mut rotation = 0.0;
