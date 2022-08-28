@@ -12,7 +12,7 @@ fn get_profiler() -> &'static mut Profiler {
             active_query: None,
             prev_frame: Frame::new(),
             enabled: false,
-            enable_request: None
+            enable_request: None,
         })
     }
 }
@@ -124,7 +124,7 @@ struct Profiler {
     queries: HashMap<String, GpuQuery>,
     active_query: Option<String>,
     enabled: bool,
-    enable_request: Option<bool>
+    enable_request: Option<bool>,
 }
 
 impl Profiler {

@@ -144,7 +144,7 @@ async fn main() {
 
     let mut number0 = 0.;
     let mut number1 = 0.;
-    
+
     loop {
         clear_background(WHITE);
 

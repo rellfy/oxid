@@ -3,8 +3,8 @@ extern crate oxid_core as oxid;
 
 use crate::get_context;
 
-use oxid::PassAction;
 use crate::quad_gl::Color;
+use oxid::PassAction;
 
 // oxid is re-exported for the use in combination with `get_internal_gl`
 // pub use oxid;

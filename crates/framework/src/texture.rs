@@ -2,8 +2,8 @@
 
 use crate::{file::load_file, get_context, math::Rect};
 
-use glam::{vec2, Vec2};
 use crate::quad_gl::{Color, DrawMode, Vertex};
+use glam::{vec2, Vec2};
 
 pub use crate::quad_gl::{FilterMode, Image, Texture2D};
 

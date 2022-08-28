@@ -376,16 +376,15 @@ impl MagicSnapshoter {
                     })
                     .unwrap_or(false)
             {
-                self.screen_texture = Some(Texture2D::from_oxid_texture(
-                    Texture::new_render_texture(
+                self.screen_texture =
+                    Some(Texture2D::from_oxid_texture(Texture::new_render_texture(
                         ctx,
                         TextureParams {
                             width: screen_width as _,
                             height: screen_height as _,
                             ..Default::default()
                         },
-                    ),
-                ))
+                    )))
             }
 
             let texture = self.screen_texture.unwrap();
@@ -963,12 +962,7 @@ impl Texture2D {
         Self::from_rgba8(ctx, width, height, &bytes)
     }
 
-    pub fn from_rgba8(
-        ctx: &mut oxid::Context,
-        width: u16,
-        height: u16,
-        bytes: &[u8],
-    ) -> Texture2D {
+    pub fn from_rgba8(ctx: &mut oxid::Context, width: u16, height: u16, bytes: &[u8]) -> Texture2D {
         let texture = oxid::Texture::from_rgba8(ctx, width, height, &bytes);
 
         Texture2D { texture }

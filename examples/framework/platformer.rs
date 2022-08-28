@@ -1,7 +1,7 @@
-use rwasm;
 use oxid_framework::prelude::*;
 use oxid_framework_tiled as tiled;
 use physics_platformer::*;
+use rwasm;
 
 struct Player {
     collider: Actor,

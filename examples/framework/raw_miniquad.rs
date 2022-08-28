@@ -40,10 +40,9 @@ async fn main() {
             for i in 0..10 {
                 let t = t + i as f64 * 0.3;
 
-                gl.quad_context
-                    .apply_uniforms(&raw_oxid::shader::Uniforms {
-                        offset: (t.sin() as f32 * 0.5, (t * 3.).cos() as f32 * 0.5),
-                    });
+                gl.quad_context.apply_uniforms(&raw_oxid::shader::Uniforms {
+                    offset: (t.sin() as f32 * 0.5, (t * 3.).cos() as f32 * 0.5),
+                });
                 gl.quad_context.draw(0, 6, 1);
             }
             gl.quad_context.end_render_pass();

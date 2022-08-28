@@ -2,8 +2,8 @@
 
 extern crate oxid_core as oxid;
 use crate::get_context;
-use oxid::{PipelineParams, ShaderError, UniformType};
 use crate::quad_gl::GlPipeline;
+use oxid::{PipelineParams, ShaderError, UniformType};
 
 /// Material instance loaded on GPU.
 #[derive(Copy, Clone, Debug, PartialEq)]

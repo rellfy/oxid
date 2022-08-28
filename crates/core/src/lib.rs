@@ -2,9 +2,9 @@ extern crate oxid_wasm as oxid;
 
 pub mod clipboard;
 pub mod conf;
+mod event;
 pub mod fs;
 pub mod graphics;
-mod event;
 
 pub use event::*;
 pub use graphics::*;
@@ -13,14 +13,14 @@ pub use oxid::gl;
 use std::ffi::CString;
 
 #[deprecated(
-note = "libc rand is slow and inconsistent across platforms. Please use quad-rnd crate instead."
+    note = "libc rand is slow and inconsistent across platforms. Please use quad-rnd crate instead."
 )]
 pub unsafe fn rand() -> i32 {
     oxid::rand()
 }
 
 #[deprecated(
-note = "libc rand is slow and inconsistent across platforms. Please use quad-rnd crate instead."
+    note = "libc rand is slow and inconsistent across platforms. Please use quad-rnd crate instead."
 )]
 pub const RAND_MAX: u32 = oxid::RAND_MAX;
 
@@ -39,7 +39,7 @@ impl Context {
     /// TODO: implement window focus events
     pub fn set_cursor_grab(&self, grab: bool) {
         #[cfg(not(target_os = "ios"))]
-            unsafe {
+        unsafe {
             oxid::oxid_set_cursor_grab(grab);
         }
     }
@@ -240,8 +240,8 @@ extern "C" fn event(event: *const oxid::oxid_event, user_data: *mut ::std::os::r
 /// }
 /// ```
 pub fn start<F>(conf: conf::Conf, f: F)
-    where
-        F: 'static + FnOnce(Context) -> UserData,
+where
+    F: 'static + FnOnce(Context) -> UserData,
 {
     let mut desc: oxid::oxid_desc = unsafe { std::mem::zeroed() };
 
