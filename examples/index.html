@@ -22,7 +22,7 @@
     <script src="/crates/native/wasm/js/gl.js"></script>
     <script src="/crates/native/wasm/js/oxid.js"></script>
     <script>
-        const path = "/target/wasm32-unknown-unknown/release/examples/platformer.wasm";
+        const path = "/target/wasm32-unknown-unknown/release/examples/basic_shapes.wasm";
         const wasm = new RWASM(path, {}, window.oxidImportObject);
 
         wasm.on("load", () => {
