@@ -1,92 +1,36 @@
-// #[cfg(target_arch = "wasm32")]
 extern crate oxid_wasm as oxid;
 
 pub mod clipboard;
 pub mod conf;
-mod event;
 pub mod fs;
 pub mod graphics;
-
-#[cfg(feature = "log-impl")]
-pub mod log;
+mod event;
 
 pub use event::*;
-
 pub use graphics::*;
-
 pub use oxid::gl;
 
 use std::ffi::CString;
 
 #[deprecated(
-since = "0.3",
-note = "libc rand is slow and incosistent across platforms. Please use quad-rnd crate instead."
+note = "libc rand is slow and inconsistent across platforms. Please use quad-rnd crate instead."
 )]
 pub unsafe fn rand() -> i32 {
     oxid::rand()
 }
+
 #[deprecated(
-since = "0.3",
-note = "libc rand is slow and incosistent across platforms. Please use quad-rnd crate instead."
+note = "libc rand is slow and inconsistent across platforms. Please use quad-rnd crate instead."
 )]
 pub const RAND_MAX: u32 = oxid::RAND_MAX;
 
 pub mod date {
-    #[cfg(not(target_arch = "wasm32"))]
-    pub fn now() -> f64 {
-        use std::time::SystemTime;
-
-        let time = SystemTime::now()
-            .duration_since(SystemTime::UNIX_EPOCH)
-            .unwrap_or_else(|e| panic!(e));
-        time.as_secs_f64()
-    }
-
-    #[cfg(target_arch = "wasm32")]
     pub fn now() -> f64 {
         unsafe { oxid::now() }
     }
 }
 
 impl Context {
-    /// This function simply quits the application without
-    /// giving the user a chance to intervene. Usually this might
-    /// be called when the user clicks the 'Ok' button in a 'Really Quit?'
-    /// dialog box
-    pub fn quit(&self) {
-        // its not possible to quit wasm anyway
-        #[cfg(not(target_arch = "wasm32"))]
-            unsafe {
-            oxid::oxid_quit();
-        }
-    }
-
-    /// Calling request_quit() will trigger "quit_requested_event" event , giving
-    /// the user code a chance to intervene and cancel the pending quit process
-    /// (for instance to show a 'Really Quit?' dialog box).
-    /// If the event handler callback does nothing, the application will be quit as usual.
-    /// To prevent this, call the function "cancel_quit()"" from inside the event handler.
-    pub fn request_quit(&self) {
-        // its not possible to quit wasm anyway
-        #[cfg(not(target_arch = "wasm32"))]
-            unsafe {
-            oxid::oxid_request_quit();
-        }
-    }
-
-    /// Cancels a pending quit request, either initiated
-    /// by the user clicking the window close button, or programmatically
-    /// by calling "request_quit()". The only place where calling this
-    /// function makes sense is from inside the event handler callback when
-    /// the "quit_requested_event" event has been received
-    pub fn cancel_quit(&self) {
-        // its not possible to quit wasm anyway
-        #[cfg(not(target_arch = "wasm32"))]
-            unsafe {
-            oxid::oxid_cancel_quit();
-        }
-    }
-
     /// Capture mouse cursor to the current window
     /// On WASM this will automatically hide cursor
     /// On desktop this will bound cursor to windows border
