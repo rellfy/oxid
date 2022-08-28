@@ -27,12 +27,3 @@ glam = {version = "0.10", features = ["scalar-math"] }
 image = { version = "0.22", default-features = false, features = ["png_codec", "tga"] }
 fontdue = "0.4.0"
 rwasm = { git = "https://github.com/rellfy/rwasm", branch = "master" }
-
-[dev-dependencies]
-physics-platformer = { path = "./physics-platformer" }
-oxid_framework_tiled = { path = "./tiled" }
-
-# workaround to fix the examples
-# this allows to use megaui-framework in examples without two versions of framework
-[patch.crates-io]
-oxid_framework = { path = './' }
