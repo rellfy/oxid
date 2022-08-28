@@ -249,7 +249,7 @@ impl EventHandlerFree for Stage {
                     unsafe {
                         MAIN_FUTURE = None;
                     }
-                    get_context().quad_context.quit();
+                    // "quit".
                     return;
                 }
                 get_context().coroutines_context.update();
