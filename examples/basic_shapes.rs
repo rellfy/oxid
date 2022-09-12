@@ -1,8 +1,14 @@
-use oxid_framework::prelude::*;
+use rwasm;
+use oxid::framework::prelude::*;
 
 #[rwasm::main]
 async fn main() {
-    oxid_framework::Window::new("basic_shapes", render());
+    oxid::framework::Window::new("basic_shapes", render());
+}
+
+#[no_mangle]
+fn load_scripts() {
+    rwasm::send_bytes("load_script", oxid::js().as_bytes());
 }
 
 async fn render() {
