@@ -1,8 +1,7 @@
 //! 2D shapes rendering.
 
-use crate::{color::Color, get_context};
-
-use crate::quad_gl::{DrawMode, Vertex};
+use crate::framework::{color::Color, get_context};
+use crate::framework::quad_gl::{DrawMode, Vertex};
 use glam::{vec2, Vec2};
 
 pub fn draw_triangle(v1: Vec2, v2: Vec2, v3: Vec2, color: Color) {

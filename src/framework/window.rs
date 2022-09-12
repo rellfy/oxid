@@ -1,17 +1,16 @@
 //! Window and associated to window rendering context related functions.
-extern crate oxid_core as oxid;
 
-use crate::get_context;
-
-use crate::quad_gl::Color;
-use oxid::PassAction;
+use crate::core;
+use crate::framework::get_context;
+use crate::framework::quad_gl::Color;
+use crate::core::PassAction;
 
 // oxid is re-exported for the use in combination with `get_internal_gl`
 // pub use oxid;
 
 /// Block execution until the next frame.
-pub fn next_frame() -> crate::exec::FrameFuture {
-    crate::exec::FrameFuture
+pub fn next_frame() -> crate::framework::exec::FrameFuture {
+    crate::framework::exec::FrameFuture
 }
 
 pub fn clear_background(color: Color) {
@@ -32,8 +31,8 @@ pub fn clear_background(color: Color) {
 }
 
 pub struct InternalGlContext<'a> {
-    pub quad_context: &'a mut oxid::Context,
-    pub quad_gl: &'a mut crate::quad_gl::QuadGl,
+    pub quad_context: &'a mut core::Context,
+    pub quad_gl: &'a mut crate::framework::quad_gl::QuadGl,
 }
 
 impl<'a> InternalGlContext<'a> {

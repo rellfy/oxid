@@ -1,8 +1,7 @@
 //! 3D shapes and models, loading 3d models from files, drawing 3D primitives.
 
-use crate::{color::Color, get_context};
-
-use crate::quad_gl::{DrawMode, Texture2D};
+use crate::framework::{color::Color, get_context};
+use crate::framework::quad_gl::{DrawMode, Texture2D};
 use glam::{vec2, vec3, Vec2, Vec3};
 
 #[derive(Clone, Debug, Copy)]
@@ -12,8 +11,8 @@ pub struct Vertex {
     pub color: Color,
 }
 
-impl From<Vertex> for crate::quad_gl::VertexInterop {
-    fn from(vertex: Vertex) -> crate::quad_gl::VertexInterop {
+impl From<Vertex> for crate::framework::quad_gl::VertexInterop {
+    fn from(vertex: Vertex) -> crate::framework::quad_gl::VertexInterop {
         (
             vertex.position.into(),
             vertex.uv.into(),

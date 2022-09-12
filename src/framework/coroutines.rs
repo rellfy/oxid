@@ -8,8 +8,9 @@ use std::future::Future;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
-use crate::exec::ExecState;
-use crate::get_context;
+use crate::core;
+use crate::framework::exec::ExecState;
+use crate::framework::get_context;
 
 pub(crate) struct CoroutinesContext {
     futures: Vec<Option<(Pin<Box<dyn Future<Output = ()>>>, ExecState)>>,
@@ -86,7 +87,7 @@ impl Future for TimerDelayFuture {
     type Output = Option<()>;
 
     fn poll(self: Pin<&mut Self>, _: &mut Context) -> Poll<Self::Output> {
-        if oxid::date::now() - self.start_time >= self.time as f64 {
+        if core::date::now() - self.start_time >= self.time as f64 {
             Poll::Ready(Some(()))
         } else {
             Poll::Pending
@@ -96,7 +97,7 @@ impl Future for TimerDelayFuture {
 
 pub fn wait_seconds(time: f32) -> TimerDelayFuture {
     TimerDelayFuture {
-        start_time: oxid::date::now(),
+        start_time: core::date::now(),
         time,
     }
 }
@@ -109,6 +110,7 @@ pub mod tweens {
         ops::{Add, Mul, Sub},
         task::{Context, Poll},
     };
+    use crate::core;
 
     pub struct LinearTweanFuture<T>
     where
@@ -132,7 +134,7 @@ pub mod tweens {
         type Output = ();
 
         fn poll(mut self: Pin<&mut Self>, _: &mut Context) -> Poll<Self::Output> {
-            let t = (oxid::date::now() - self.start_time) / self.time as f64;
+            let t = (core::date::now() - self.start_time) / self.time as f64;
             if t <= 1. {
                 unsafe { *self.var = self.from + (self.to - self.from) * t as f32 };
                 Poll::Pending
@@ -152,7 +154,7 @@ pub mod tweens {
             to,
             from: *x,
             time,
-            start_time: oxid::date::now(),
+            start_time: core::date::now(),
         }
     }
 

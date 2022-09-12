@@ -1,9 +1,8 @@
 //! Custom materials - shaders, uniforms.
 
-extern crate oxid_core as oxid;
-use crate::get_context;
-use crate::quad_gl::GlPipeline;
-use oxid::{PipelineParams, ShaderError, UniformType};
+use crate::framework::get_context;
+use crate::framework::quad_gl::GlPipeline;
+use crate::core::{PipelineParams, ShaderError, UniformType};
 
 /// Material instance loaded on GPU.
 #[derive(Copy, Clone, Debug, PartialEq)]

@@ -1,5 +1,4 @@
-use crate::time::get_time;
-
+use crate::framework::time::get_time;
 use std::collections::HashMap;
 
 static mut PROFILER: Option<Profiler> = None;
@@ -139,7 +138,7 @@ impl Profiler {
             .queries
             .entry(name.clone())
             .or_insert_with(|| GpuQuery {
-                query: oxid::graphics::ElapsedQuery::new(),
+                query: crate::core::graphics::ElapsedQuery::new(),
                 in_progress: false,
                 value: 0,
                 force_resume: false,
@@ -203,7 +202,7 @@ impl Profiler {
 }
 
 pub struct GpuQuery {
-    pub query: oxid::graphics::ElapsedQuery,
+    pub query: crate::core::graphics::ElapsedQuery,
     pub in_progress: bool,
     pub value: u64,
     pub force_resume: bool,

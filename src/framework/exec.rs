@@ -2,6 +2,7 @@ use std::fmt;
 use std::future::Future;
 use std::pin::Pin;
 use std::task::{Context, Poll};
+use crate::core;
 
 #[derive(Debug, PartialEq)]
 pub enum ExecState {
@@ -29,7 +30,7 @@ impl Future for FrameFuture {
 
 #[derive(Debug)]
 pub struct FileError {
-    pub kind: oxid::fs::Error,
+    pub kind: core::fs::Error,
     pub path: String,
 }
 type FileResult<T> = Result<T, FileError>;
@@ -41,7 +42,7 @@ impl fmt::Display for FileError {
     }
 }
 impl FileError {
-    pub fn new(kind: oxid::fs::Error, path: &str) -> Self {
+    pub fn new(kind: core::fs::Error, path: &str) -> Self {
         Self {
             kind,
             path: path.to_string(),

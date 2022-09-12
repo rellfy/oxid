@@ -1,10 +1,9 @@
 //! Functions to load fonts and draw text.
 
 use std::collections::HashMap;
-
-use crate::{color::Color, get_context, math::Rect};
-
-use crate::quad_gl::{Image, Texture2D, WHITE};
+use crate::framework::{color::Color, get_context, math::Rect};
+use crate::framework::quad_gl::{Image, Texture2D, WHITE};
+use crate::core;
 use glam::vec2;
 
 #[derive(Debug)]
@@ -43,7 +42,7 @@ impl FontInternal {
     // pixel gap between glyphs in the atlas
     const GAP: u16 = 2;
 
-    fn load_from_bytes(ctx: &mut oxid::Context, bytes: &[u8]) -> FontInternal {
+    fn load_from_bytes(ctx: &mut core::Context, bytes: &[u8]) -> FontInternal {
         let font_image = Image::gen_image_color(512, 512, Color::new(0.0, 0.0, 0.0, 0.0));
         let font_texture =
             Texture2D::from_rgba8(ctx, font_image.width, font_image.height, &font_image.bytes);
@@ -200,7 +199,7 @@ impl Default for TextParams {
 
 /// Load font from file with "path"   
 pub async fn load_ttf_font(path: &str) -> Font {
-    let bytes = crate::file::load_file(path).await.unwrap();
+    let bytes = crate::framework::file::load_file(path).await.unwrap();
 
     load_ttf_font_from_bytes(&bytes[..])
 }
@@ -269,12 +268,12 @@ pub fn draw_text_ex(text: &str, x: f32, y: f32, params: TextParams) {
                 font_data.glyph_h as f32,
             );
 
-            crate::texture::draw_texture_ex(
+            crate::framework::texture::draw_texture_ex(
                 font.font_texture,
                 dest.x,
                 dest.y,
                 params.color,
-                crate::texture::DrawTextureParams {
+                crate::framework::texture::DrawTextureParams {
                     dest_size: Some(vec2(dest.w, dest.h)),
                     source: Some(source),
                     ..Default::default()
@@ -345,7 +344,7 @@ pub(crate) struct FontsStorage {
     fonts: Vec<FontInternal>,
 }
 impl FontsStorage {
-    pub(crate) fn new(ctx: &mut oxid::Context) -> FontsStorage {
+    pub(crate) fn new(ctx: &mut core::Context) -> FontsStorage {
         let default_font = FontInternal::load_from_bytes(ctx, include_bytes!("ProggyClean.ttf"));
         FontsStorage {
             fonts: vec![default_font],

@@ -1,6 +1,7 @@
 //! Cross platform system time access and FPS counters.
 
-use crate::get_context;
+use crate::framework::get_context;
+use crate::core;
 
 /// Set target FPS (maximum)
 pub fn set_target_fps(_fps: f32) {
@@ -25,5 +26,5 @@ pub fn get_frame_time() -> f32 {
 pub fn get_time() -> f64 {
     let context = get_context();
 
-    oxid::date::now() - context.start_time
+    core::date::now() - context.start_time
 }

@@ -1,7 +1,7 @@
 //! Cross-platform mouse, keyboard (and gamepads soon) module.
-extern crate oxid_core as oxid;
-use crate::get_context;
-pub use oxid::{KeyCode, MouseButton};
+
+use crate::framework::get_context;
+pub use crate::core::{KeyCode, MouseButton};
 
 pub fn mouse_position() -> (f32, f32) {
     let context = get_context();

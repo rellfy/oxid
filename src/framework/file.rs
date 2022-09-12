@@ -1,8 +1,7 @@
 //! Cross platform files management functions.
 
-use crate::exec;
-
-pub use crate::exec::FileError;
+use crate::framework::exec;
+pub use crate::framework::exec::FileError;
 
 /// Load file from the path and block until its loaded
 /// Will use filesystem on PC and do http request on web
@@ -17,7 +16,7 @@ pub fn load_file(path: &str) -> exec::FileLoadingFuture {
         let contents = contents.clone();
         let err_path = path.clone();
 
-        oxid::fs::load_file(&path, move |bytes| {
+        crate::core::fs::load_file(&path, move |bytes| {
             *contents.borrow_mut() =
                 Some(bytes.map_err(|kind| exec::FileError::new(kind, &err_path)));
         });

@@ -1,26 +1,22 @@
-//! Mose common types that can be glob-imported `use framework::prelude::*` for convenience.
+//! Mose common types that can be glob-imported `use oxid::framework::prelude::*` for convenience.
 
-pub use crate::camera::*;
-pub use crate::file::*;
-pub use crate::input::*;
-pub use crate::material::*;
-pub use crate::math::*;
-pub use crate::models::*;
-pub use crate::shapes::*;
-pub use crate::text::*;
-pub use crate::texture::*;
-pub use crate::time::*;
-pub use crate::window::*;
+pub use crate::framework::camera::*;
+pub use crate::framework::file::*;
+pub use crate::framework::input::*;
+pub use crate::framework::material::*;
+pub use crate::framework::math::*;
+pub use crate::framework::models::*;
+pub use crate::framework::shapes::*;
+pub use crate::framework::text::*;
+pub use crate::framework::texture::*;
+pub use crate::framework::time::*;
+pub use crate::framework::window::*;
 
-pub use crate::quad_gl::{colors::*, Color, DrawMode, GlPipeline, QuadGl, Vertex};
+pub use crate::framework::quad_gl::{colors::*, Color, DrawMode, GlPipeline, QuadGl, Vertex};
+pub use crate::core::{conf::Conf, Comparison, PipelineParams, UniformType};
 pub use glam;
-pub use oxid::{conf::Conf, Comparison, PipelineParams, UniformType};
 pub use quad_rand as rand;
 
-pub use crate::collections;
-pub use crate::coroutines;
-
-#[cfg(feature = "log-impl")]
-pub use crate::logging::*;
-
-pub use crate::color_u8;
+pub use crate::framework::collections;
+pub use crate::framework::coroutines;
+// pub use crate::framework::quad_gl::color_u8;

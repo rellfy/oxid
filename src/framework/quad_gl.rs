@@ -1,11 +1,7 @@
-extern crate oxid_core as oxid;
-use oxid::*;
-
+use crate::core;
+use crate::core::*;
 pub use colors::*;
-
-pub use oxid::{FilterMode, ShaderError};
-
-//use crate::telemetry;
+pub use crate::core::{FilterMode, ShaderError};
 
 const UNIFORMS_ARRAY_SIZE: usize = 512;
 
@@ -248,12 +244,11 @@ struct MagicSnapshoter {
     pipeline: Pipeline,
     bindings: Bindings,
     pass: Option<RenderPass>,
-
     screen_texture: Option<Texture2D>,
 }
 
 mod snapshoter_shader {
-    use oxid::{ShaderMeta, UniformBlockLayout};
+    use crate::core::{ShaderMeta, UniformBlockLayout};
 
     pub const VERTEX: &str = r#"#version 100
     attribute vec2 position;
@@ -422,7 +417,7 @@ struct Uniform {
 
 #[derive(Clone)]
 struct PipelineExt {
-    pipeline: oxid::Pipeline,
+    pipeline: core::Pipeline,
     wants_screen_texture: bool,
     uniforms: Vec<Uniform>,
     uniforms_data: [u8; UNIFORMS_ARRAY_SIZE],
@@ -440,7 +435,7 @@ impl PipelinesStorage {
     const TRIANGLES_DEPTH_PIPELINE: GlPipeline = GlPipeline(2);
     const LINES_DEPTH_PIPELINE: GlPipeline = GlPipeline(3);
 
-    fn new(ctx: &mut oxid::Context) -> PipelinesStorage {
+    fn new(ctx: &mut core::Context) -> PipelinesStorage {
         let shader = Shader::new(ctx, shader::VERTEX, shader::FRAGMENT, shader::meta())
             .unwrap_or_else(|e| panic!("Failed to load shader: {}", e));
 
@@ -606,7 +601,7 @@ pub struct QuadGl {
 }
 
 impl QuadGl {
-    pub fn new(ctx: &mut oxid::Context) -> QuadGl {
+    pub fn new(ctx: &mut core::Context) -> QuadGl {
         let white_texture = Texture::from_rgba8(ctx, 1, 1, &[255, 255, 255, 255]);
 
         QuadGl {
@@ -625,7 +620,7 @@ impl QuadGl {
             draw_calls: Vec::with_capacity(200),
             draw_calls_bindings: Vec::with_capacity(200),
             draw_calls_count: 0,
-            start_time: oxid::date::now(),
+            start_time: core::date::now(),
 
             white_texture,
         }
@@ -671,7 +666,7 @@ impl QuadGl {
         self.draw_calls_count = 0;
     }
 
-    pub fn draw(&mut self, ctx: &mut oxid::Context) {
+    pub fn draw(&mut self, ctx: &mut core::Context) {
         for _ in 0..self.draw_calls.len() - self.draw_calls_bindings.len() {
             let vertex_buffer = Buffer::stream(
                 ctx,
@@ -694,7 +689,7 @@ impl QuadGl {
         assert_eq!(self.draw_calls_bindings.len(), self.draw_calls.len());
 
         let (screen_width, screen_height) = ctx.screen_size();
-        let time = (oxid::date::now() - self.start_time) as f32;
+        let time = (core::date::now() - self.start_time) as f32;
         let time = glam::vec4(time, time.sin(), time.cos(), 0.);
 
         for (dc, bindings) in self.draw_calls[0..self.draw_calls_count]
@@ -912,21 +907,21 @@ impl QuadGl {
 /// Texture, data stored in GPU memory
 #[derive(Clone, Copy, Debug)]
 pub struct Texture2D {
-    texture: oxid::Texture,
+    texture: core::Texture,
 }
 
 impl Texture2D {
-    pub fn from_oxid_texture(texture: oxid::Texture) -> Texture2D {
+    pub fn from_oxid_texture(texture: core::Texture) -> Texture2D {
         Texture2D { texture }
     }
 
     pub fn empty() -> Texture2D {
         Texture2D {
-            texture: oxid::Texture::empty(),
+            texture: core::Texture::empty(),
         }
     }
 
-    pub fn update(&mut self, ctx: &mut oxid::Context, image: &Image) {
+    pub fn update(&mut self, ctx: &mut core::Context, image: &Image) {
         assert_eq!(self.texture.width, image.width as u32);
         assert_eq!(self.texture.height, image.height as u32);
 
@@ -942,7 +937,7 @@ impl Texture2D {
     }
 
     pub fn from_file_with_format<'a>(
-        ctx: &mut oxid::Context,
+        ctx: &mut core::Context,
         bytes: &[u8],
         format: Option<image::ImageFormat>,
     ) -> Texture2D {
@@ -962,13 +957,13 @@ impl Texture2D {
         Self::from_rgba8(ctx, width, height, &bytes)
     }
 
-    pub fn from_rgba8(ctx: &mut oxid::Context, width: u16, height: u16, bytes: &[u8]) -> Texture2D {
-        let texture = oxid::Texture::from_rgba8(ctx, width, height, &bytes);
+    pub fn from_rgba8(ctx: &mut core::Context, width: u16, height: u16, bytes: &[u8]) -> Texture2D {
+        let texture = core::Texture::from_rgba8(ctx, width, height, &bytes);
 
         Texture2D { texture }
     }
 
-    pub fn set_filter(&self, ctx: &mut oxid::Context, filter_mode: FilterMode) {
+    pub fn set_filter(&self, ctx: &mut core::Context, filter_mode: FilterMode) {
         self.texture.set_filter(ctx, filter_mode);
     }
 
@@ -1132,7 +1127,7 @@ impl Image {
 
 mod shader {
     use super::UNIFORMS_ARRAY_SIZE;
-    use oxid::{ShaderMeta, UniformBlockLayout, UniformDesc, UniformType};
+    use crate::core::{ShaderMeta, UniformBlockLayout, UniformDesc, UniformType};
 
     pub const VERTEX: &str = r#"#version 100
     attribute vec3 position;

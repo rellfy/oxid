@@ -1,6 +1,6 @@
 pub mod core;
 pub mod wasm;
-//pub mod framework;
+pub mod framework;
 
 pub fn js() -> String {
     format!(

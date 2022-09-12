@@ -36,9 +36,9 @@
 //! }
 //!```
 
-extern crate oxid_core as oxid;
-use oxid::Context as QuadContext;
-use oxid::*;
+use crate::core::Context as QuadContext;
+use crate::core::*;
+use crate::core;
 
 use std::collections::HashSet;
 use std::future::Future;
@@ -71,12 +71,6 @@ pub mod telemetry;
 /// Cross platform random generator.
 pub mod rand {
     pub use quad_rand::*;
-}
-
-#[cfg(feature = "log-impl")]
-/// Logging macroses, available with "log-impl" feature.
-pub mod logging {
-    pub use oxid::{debug, error, info, warn};
 }
 
 use drawing::DrawContext;
@@ -132,8 +126,8 @@ impl Context {
             quad_context: ctx,
             coroutines_context: coroutines::CoroutinesContext::new(),
 
-            start_time: oxid::date::now(),
-            last_frame_time: oxid::date::now(),
+            start_time: core::date::now(),
+            last_frame_time: core::date::now(),
             frame_time: 1. / 60.,
         }
     }
@@ -282,7 +276,7 @@ impl Window {
     }
 
     pub fn from_config(config: conf::Conf, future: impl Future<Output = ()> + 'static) {
-        oxid::start(
+        core::start(
             conf::Conf {
                 sample_count: 4,
                 ..config

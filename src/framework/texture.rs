@@ -1,11 +1,10 @@
 //! Loading and rendering textures. Also render textures, per-pixel image manipluations.
 
-use crate::{file::load_file, get_context, math::Rect};
-
-use crate::quad_gl::{Color, DrawMode, Vertex};
+use crate::core;
+use crate::framework::{file::load_file, get_context, math::Rect};
+use crate::framework::quad_gl::{Color, DrawMode, Vertex};
+pub use crate::framework::quad_gl::{FilterMode, Image, Texture2D};
 use glam::{vec2, Vec2};
-
-pub use crate::quad_gl::{FilterMode, Image, Texture2D};
 
 /// Load image from file into CPU memory
 pub async fn load_image(path: &str) -> Image {
@@ -54,22 +53,22 @@ pub fn load_texture_from_image(image: &Image) -> Texture2D {
 #[derive(Clone, Copy, Debug)]
 pub struct RenderTarget {
     pub texture: Texture2D,
-    pub render_pass: oxid::RenderPass,
+    pub render_pass: core::RenderPass,
 }
 
 pub fn render_target(width: u32, height: u32) -> RenderTarget {
     let context = &mut get_context().quad_context;
 
-    let texture = oxid::Texture::new_render_texture(
+    let texture = core::Texture::new_render_texture(
         context,
-        oxid::TextureParams {
+        core::TextureParams {
             width,
             height,
             ..Default::default()
         },
     );
 
-    let render_pass = oxid::RenderPass::new(context, texture, None);
+    let render_pass = core::RenderPass::new(context, texture, None);
 
     let texture = Texture2D::from_oxid_texture(texture);
 
@@ -215,14 +214,14 @@ pub fn get_texture_data(texture: Texture2D) -> Image {
 /// Get pixel data from screen buffer and return an Image (screenshot)
 pub fn get_screen_data() -> Image {
     unsafe {
-        crate::window::get_internal_gl().flush();
+        crate::framework::window::get_internal_gl().flush();
     }
 
     let context = get_context();
 
-    let texture = Texture2D::from_oxid_texture(oxid::Texture::new_render_texture(
+    let texture = Texture2D::from_oxid_texture(core::Texture::new_render_texture(
         &mut context.quad_context,
-        oxid::TextureParams {
+        core::TextureParams {
             width: context.screen_width as _,
             height: context.screen_height as _,
             ..Default::default()

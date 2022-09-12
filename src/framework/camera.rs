@@ -1,6 +1,7 @@
 //! 2D and 3D camera.
 
-use crate::{
+use crate::core;
+use crate::framework::{
     get_context,
     math::Rect,
     texture::RenderTarget,
@@ -11,7 +12,7 @@ use glam::{vec2, vec3, Mat4, Vec2, Vec3};
 pub trait Camera {
     fn matrix(&self) -> Mat4;
     fn depth_enabled(&self) -> bool;
-    fn render_pass(&self) -> Option<oxid::RenderPass>;
+    fn render_pass(&self) -> Option<core::RenderPass>;
 }
 
 #[derive(Clone, Copy)]
@@ -89,7 +90,7 @@ impl Camera for Camera2D {
         false
     }
 
-    fn render_pass(&self) -> Option<oxid::RenderPass> {
+    fn render_pass(&self) -> Option<core::RenderPass> {
         self.render_target.map(|rt| rt.render_pass)
     }
 }
@@ -190,7 +191,7 @@ impl Camera for Camera3D {
         true
     }
 
-    fn render_pass(&self) -> Option<oxid::RenderPass> {
+    fn render_pass(&self) -> Option<core::RenderPass> {
         self.render_target.map(|rt| rt.render_pass)
     }
 }
