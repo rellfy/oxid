@@ -4,11 +4,7 @@ if (gl === null) {
     alert("Unable to initialize WebGL. Your browser or machine may not support it.");
 }
 
-window.oxidWasmInstanceExports = null;
-
-const setOxidWasmInstance = (instance) => {
-    window.oxidWasmInstanceExports = instance.exports;
-};
+window.RWASM_EXPORTS = null;
 
 var clipboard = null;
 
@@ -59,11 +55,11 @@ if (gl.getExtension('WEBGL_depth_texture') == null) {
 }
 
 function getArray(ptr, arr, n) {
-    return new arr(oxidWasmInstanceExports.memory.buffer, ptr, n);
+    return new arr(RWASM_EXPORTS.memory.buffer, ptr, n);
 }
 
 function UTF8ToString(ptr, maxBytesToRead) {
-    let u8Array = new Uint8Array(oxidWasmInstanceExports.memory.buffer, ptr);
+    let u8Array = new Uint8Array(RWASM_EXPORTS.memory.buffer, ptr);
 
     var idx = 0;
     var endIdx = idx + maxBytesToRead;
@@ -376,7 +372,7 @@ function resize(canvas, on_resize) {
 }
 
 window.animation = function () {
-    oxidWasmInstanceExports.frame();
+    RWASM_EXPORTS.frame();
     window.requestAnimationFrame(animation);
 }
 
@@ -395,9 +391,9 @@ window.texture_size = function (internalFormat, width, height) {
 
 var emscripten_shaders_hack = false;
 
-window.oxidImportObject = window.oxidImportObject ? window.oxidImportObject : {};
-window.oxidImportObject.env = {
-    ...window.oxidImportObject.env,
+window.RWASM_IMPORT = window.RWASM_IMPORT ? window.RWASM_IMPORT : {};
+window.RWASM_IMPORT.env = {
+    ...window.RWASM_IMPORT.env,
     console_debug: function (ptr) {
         console.debug(UTF8ToString(ptr));
     },
@@ -870,12 +866,12 @@ window.oxidImportObject.env = {
                 var uInt8Array = new Uint8Array(this.response);
 
                 FS.loaded_files[file_id] = uInt8Array;
-                oxidWasmInstanceExports.file_loaded(file_id);
+                RWASM_EXPORTS.file_loaded(file_id);
             }
         }
         xhr.onerror = function (e) {
             FS.loaded_files[file_id] = null;
-            oxidWasmInstanceExports.file_loaded(file_id);
+            RWASM_EXPORTS.file_loaded(file_id);
         };
 
         xhr.send();
@@ -892,7 +888,7 @@ window.oxidImportObject.env = {
     fs_take_buffer: function (file_id, ptr, max_length) {
         var file = FS.loaded_files[file_id];
         console.assert(file.length <= max_length);
-        var dest = new Uint8Array(oxidWasmInstanceExports.memory.buffer, ptr, max_length);
+        var dest = new Uint8Array(RWASM_EXPORTS.memory.buffer, ptr, max_length);
         for (var i = 0; i < file.length; i++) {
             dest[i] = file[i];
         }

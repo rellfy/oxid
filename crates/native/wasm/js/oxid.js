@@ -145,9 +145,9 @@ window.mouse_relative_position = function (clientX, clientY) {
     return { x, y };
 }
 
-window.oxidImportObject = window.oxidImportObject ? window.oxidImportObject : {};
-window.oxidImportObject.env = {
-    ...window.oxidImportObject.env,
+window.RWASM_IMPORT = window.RWASM_IMPORT ? window.RWASM_IMPORT : {};
+window.RWASM_IMPORT.env = {
+    ...window.RWASM_IMPORT.env,
     oxid_set_clipboard: function(ptr, len) {
         clipboard = UTF8ToString(ptr, len);
     },
@@ -167,11 +167,11 @@ window.oxidOpenGlInitHook = function() {
         var y = relative_position.y;
 
         // TODO: do not send mouse_move when cursor is captured
-        oxidWasmInstanceExports.mouse_move(Math.floor(x), Math.floor(y));
+        RWASM_EXPORTS.mouse_move(Math.floor(x), Math.floor(y));
 
         // TODO: check that mouse is captured?
         if (event.movementX != 0 || event.movementY != 0) {
-            oxidWasmInstanceExports.raw_mouse_move(Math.floor(event.movementX), Math.floor(event.movementY));
+            RWASM_EXPORTS.raw_mouse_move(Math.floor(event.movementX), Math.floor(event.movementY));
         }
     };
 
@@ -181,13 +181,13 @@ window.oxidOpenGlInitHook = function() {
         var y = relative_position.y;
 
         var btn = into_oxid_mousebutton(event.button);
-        oxidWasmInstanceExports.mouse_down(x, y, btn);
+        RWASM_EXPORTS.mouse_down(x, y, btn);
     };
 
     // SO WEB SO CONSISTENT
     canvas.addEventListener('wheel', function (event) {
         event.preventDefault();
-        oxidWasmInstanceExports.mouse_wheel(-event.deltaX, -event.deltaY);
+        RWASM_EXPORTS.mouse_wheel(-event.deltaX, -event.deltaY);
     });
 
     canvas.onmouseup = function (event) {
@@ -196,7 +196,7 @@ window.oxidOpenGlInitHook = function() {
         var y = relative_position.y;
 
         var btn = into_oxid_mousebutton(event.button);
-        oxidWasmInstanceExports.mouse_up(x, y, btn);
+        RWASM_EXPORTS.mouse_up(x, y, btn);
     };
 
     canvas.onkeydown = function (event) {
@@ -222,17 +222,17 @@ window.oxidOpenGlInitHook = function() {
         if (event.altKey) {
             modifiers |= OXID_MODIFIER_ALT;
         }
-        oxidWasmInstanceExports.key_down(oxid_key_code, modifiers, event.repeat);
+        RWASM_EXPORTS.key_down(oxid_key_code, modifiers, event.repeat);
         // for "space" preventDefault will prevent
         // key_press event, so send it here instead
         if (oxid_key_code == 32) {
-            oxidWasmInstanceExports.key_press(oxid_key_code);
+            RWASM_EXPORTS.key_press(oxid_key_code);
         }
     };
 
     canvas.onkeyup = function (event) {
         var oxid_key_code = into_oxid_keycode(event.code);
-        oxidWasmInstanceExports.key_up(oxid_key_code);
+        RWASM_EXPORTS.key_up(oxid_key_code);
     };
 
     canvas.onkeypress = function (event) {
@@ -242,7 +242,7 @@ window.oxidOpenGlInitHook = function() {
         // workaround to make this behavior consistent
         let chrome_only = oxid_key_code == 261 || event.ctrlKey;
         if (chrome_only == false) {
-            oxidWasmInstanceExports.key_press(event.charCode);
+            RWASM_EXPORTS.key_press(event.charCode);
         }
     };
 
@@ -250,7 +250,7 @@ window.oxidOpenGlInitHook = function() {
         event.preventDefault();
 
         for (touch of event.changedTouches) {
-            oxidWasmInstanceExports.touch(OXID_EVENTTYPE_TOUCHES_BEGAN, touch.identifier, Math.floor(touch.clientX), Math.floor(touch.clientY));
+            RWASM_EXPORTS.touch(OXID_EVENTTYPE_TOUCHES_BEGAN, touch.identifier, Math.floor(touch.clientX), Math.floor(touch.clientY));
         }
     });
 
@@ -258,7 +258,7 @@ window.oxidOpenGlInitHook = function() {
         event.preventDefault();
 
         for (touch of event.changedTouches) {
-            oxidWasmInstanceExports.touch(OXID_EVENTTYPE_TOUCHES_ENDED, touch.identifier, Math.floor(touch.clientX), Math.floor(touch.clientY));
+            RWASM_EXPORTS.touch(OXID_EVENTTYPE_TOUCHES_ENDED, touch.identifier, Math.floor(touch.clientX), Math.floor(touch.clientY));
         }
     });
 
@@ -266,7 +266,7 @@ window.oxidOpenGlInitHook = function() {
         event.preventDefault();
 
         for (touch of event.changedTouches) {
-            oxidWasmInstanceExports.touch(OXID_EVENTTYPE_TOUCHES_CANCELED, touch.identifier, Math.floor(touch.clientX), Math.floor(touch.clientY));
+            RWASM_EXPORTS.touch(OXID_EVENTTYPE_TOUCHES_CANCELED, touch.identifier, Math.floor(touch.clientX), Math.floor(touch.clientY));
         }
     });
 
@@ -274,12 +274,12 @@ window.oxidOpenGlInitHook = function() {
         event.preventDefault();
 
         for (touch of event.changedTouches) {
-            oxidWasmInstanceExports.touch(OXID_EVENTTYPE_TOUCHES_MOVED, touch.identifier, Math.floor(touch.clientX), Math.floor(touch.clientY));
+            RWASM_EXPORTS.touch(OXID_EVENTTYPE_TOUCHES_MOVED, touch.identifier, Math.floor(touch.clientX), Math.floor(touch.clientY));
         }
     });
 
     window.onresize = function () {
-        resize(canvas, oxidWasmInstanceExports.resize);
+        resize(canvas, RWASM_EXPORTS.resize);
     };
 
     window.addEventListener("copy", function(e) {
@@ -304,10 +304,10 @@ window.oxidOpenGlInitHook = function() {
 
         if (pastedData != undefined && pastedData != null && pastedData.length != 0) {
             var len = pastedData.length;
-            var msg = oxidWasmInstanceExports.allocate_vec_u8(len);
-            var heap = new Uint8Array(oxidWasmInstanceExports.memory.buffer, msg, len);
+            var msg = RWASM_EXPORTS.allocate_vec_u8(len);
+            var heap = new Uint8Array(RWASM_EXPORTS.memory.buffer, msg, len);
             stringToUTF8(pastedData, heap, 0, len);
-            oxidWasmInstanceExports.on_clipboard_paste(msg, len);
+            RWASM_EXPORTS.on_clipboard_paste(msg, len);
         }
     });
 }
