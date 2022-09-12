@@ -11,3 +11,7 @@ readme = "README.md"
 [dependencies]
 oxid_core = { path = "../core" }
 oxid_framework = { path = "../framework" }
+rwasm = "0.0.1"
+
+[features]
+default = []

@@ -26,4 +26,3 @@ quad-rand = "0.1"
 glam = {version = "0.10", features = ["scalar-math"] }
 image = { version = "0.22", default-features = false, features = ["png_codec", "tga"] }
 fontdue = "0.4.0"
-rwasm = { git = "https://github.com/rellfy/rwasm", branch = "master" }
