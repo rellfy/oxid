@@ -1,15 +1,15 @@
 //! Clipboard abstraction
-use crate::Context;
+use crate::core::Context;
 
 mod clipboard {
-    use crate::Context;
+    use crate::core::Context;
 
     pub fn get(_ctx: &mut Context) -> Option<String> {
-        oxid_wasm::clipboard_get()
+        crate::wasm::clipboard_get()
     }
 
     pub fn set(_ctx: &mut Context, data: &str) {
-        oxid_wasm::clipboard_set(data);
+        crate::wasm::clipboard_set(data);
     }
 }
 

@@ -40,7 +40,7 @@ mod wasm {
     #[no_mangle]
     pub extern "C" fn file_loaded(file_id: u32) {
         use super::Error;
-        use oxid_wasm::fs;
+        use crate::wasm::fs;
 
         FILES.with(|files| {
             let mut files = files.borrow_mut();
@@ -60,7 +60,7 @@ mod wasm {
     }
 
     pub fn load_file<F: Fn(Response) + 'static>(path: &str, on_loaded: F) {
-        use oxid_wasm::fs;
+        use crate::wasm::fs;
         use std::ffi::CString;
 
         let url = CString::new(path).unwrap();

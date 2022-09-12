@@ -1,4 +1,5 @@
-use crate::{oxid::*, Context};
+use crate::wasm::*;
+use crate::core::Context;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Texture {

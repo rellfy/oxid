@@ -1,11 +1,7 @@
-use std::{ffi::CString, mem};
-
 mod texture;
-
-use crate::oxid::*;
-
+use std::{ffi::CString, mem};
 use std::{error::Error, fmt::Display};
-
+use crate::wasm::*;
 pub use texture::{FilterMode, Texture, TextureAccess, TextureFormat, TextureParams, TextureWrap};
 
 fn get_uniform_location(program: GLuint, name: &str) -> Option<i32> {

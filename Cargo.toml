@@ -1,7 +1,26 @@
-[workspace]
-members = [
-    "crates/oxid",
-    "crates/core",
-    "crates/native/wasm",
-    "crates/framework",
-]
+[package]
+name = "oxid"
+version = "0.0.0"
+authors = ["Lorenzo Fontoura <lorenzo@nioel.com>"]
+edition = "2018"
+license = "MIT"
+homepage = "https://github.com/rellfy/oxid"
+repository = "https://github.com/rellfy/oxid"
+readme = "README.md"
+
+[features]
+default = []
+
+[package.metadata.docs.rs]
+all-features = true
+
+[dev-dependencies]
+glam = {version = "0.8", features = ["scalar-math"] }
+quad-rand = "0.1"
+
+[dependencies]
+rwasm = "0.0.1"
+quad-rand = "0.1"
+glam = {version = "0.10", features = ["scalar-math"] }
+image = { version = "0.22", default-features = false, features = ["png_codec", "tga"] }
+fontdue = "0.4.0"

@@ -1,14 +1,12 @@
-extern crate oxid_wasm as oxid;
-
 pub mod clipboard;
 pub mod conf;
-mod event;
 pub mod fs;
 pub mod graphics;
+mod event;
 
 pub use event::*;
 pub use graphics::*;
-pub use oxid::gl;
+pub use crate::wasm::{self, gl};
 
 use std::ffi::CString;
 
@@ -16,17 +14,17 @@ use std::ffi::CString;
     note = "libc rand is slow and inconsistent across platforms. Please use quad-rnd crate instead."
 )]
 pub unsafe fn rand() -> i32 {
-    oxid::rand()
+    wasm::rand()
 }
 
 #[deprecated(
     note = "libc rand is slow and inconsistent across platforms. Please use quad-rnd crate instead."
 )]
-pub const RAND_MAX: u32 = oxid::RAND_MAX;
+pub const RAND_MAX: u32 = wasm::RAND_MAX;
 
 pub mod date {
     pub fn now() -> f64 {
-        unsafe { oxid::now() }
+        unsafe { crate::wasm::now() }
     }
 }
 
@@ -40,14 +38,14 @@ impl Context {
     pub fn set_cursor_grab(&self, grab: bool) {
         #[cfg(not(target_os = "ios"))]
         unsafe {
-            oxid::oxid_set_cursor_grab(grab);
+            wasm::oxid_set_cursor_grab(grab);
         }
     }
 
     /// Show or hide the mouse cursor
     pub fn show_mouse(&self, shown: bool) {
         unsafe {
-            oxid::oxid_show_mouse(shown);
+            wasm::oxid_show_mouse(shown);
         }
     }
 }
@@ -116,7 +114,7 @@ extern "C" fn frame(user_data: *mut ::std::os::raw::c_void) {
     event_call!(data, draw);
 }
 
-extern "C" fn event(event: *const oxid::oxid_event, user_data: *mut ::std::os::raw::c_void) {
+extern "C" fn event(event: *const wasm::oxid_event, user_data: *mut ::std::os::raw::c_void) {
     let data: &mut UserDataState = unsafe { &mut *(user_data as *mut UserDataState) };
     let event = unsafe { &*event };
 
@@ -127,13 +125,13 @@ extern "C" fn event(event: *const oxid::oxid_event, user_data: *mut ::std::os::r
     };
 
     match event.type_ {
-        oxid::OXID_EVENT_TYPE_MOUSE_MOVE => {
+        wasm::OXID_EVENT_TYPE_MOUSE_MOVE => {
             event_call!(data, mouse_motion_event, event.mouse_x, event.mouse_y);
         }
-        oxid::OXID_EVENT_TYPE_MOUSE_SCROLL => {
+        wasm::OXID_EVENT_TYPE_MOUSE_SCROLL => {
             event_call!(data, mouse_wheel_event, event.scroll_x, event.scroll_y);
         }
-        oxid::OXID_EVENT_TYPE_MOUSE_DOWN => {
+        wasm::OXID_EVENT_TYPE_MOUSE_DOWN => {
             event_call!(
                 data,
                 mouse_button_down_event,
@@ -142,7 +140,7 @@ extern "C" fn event(event: *const oxid::oxid_event, user_data: *mut ::std::os::r
                 event.mouse_y
             );
         }
-        oxid::OXID_EVENT_TYPE_MOUSE_UP => {
+        wasm::OXID_EVENT_TYPE_MOUSE_UP => {
             event_call!(
                 data,
                 mouse_button_up_event,
@@ -151,26 +149,26 @@ extern "C" fn event(event: *const oxid::oxid_event, user_data: *mut ::std::os::r
                 event.mouse_y
             );
         }
-        oxid::OXID_EVENT_TYPE_CHAR => {
+        wasm::OXID_EVENT_TYPE_CHAR => {
             if let Some(character) = std::char::from_u32(event.char_code) {
                 let key_mods = KeyMods::from(event.modifiers);
 
                 event_call!(data, char_event, character, key_mods, event.key_repeat)
             }
         }
-        oxid::OXID_EVENT_TYPE_KEY_DOWN => {
+        wasm::OXID_EVENT_TYPE_KEY_DOWN => {
             let keycode = KeyCode::from(event.key_code);
             let key_mods = KeyMods::from(event.modifiers);
 
             event_call!(data, key_down_event, keycode, key_mods, event.key_repeat)
         }
-        oxid::OXID_EVENT_TYPE_KEY_UP => {
+        wasm::OXID_EVENT_TYPE_KEY_UP => {
             let keycode = KeyCode::from(event.key_code);
             let key_mods = KeyMods::from(event.modifiers);
 
             event_call!(data, key_up_event, keycode, key_mods);
         }
-        oxid::OXID_EVENT_TYPE_RESIZED => {
+        wasm::OXID_EVENT_TYPE_RESIZED => {
             event_call!(
                 data,
                 resize_event,
@@ -178,10 +176,10 @@ extern "C" fn event(event: *const oxid::oxid_event, user_data: *mut ::std::os::r
                 event.window_height as f32
             );
         }
-        oxid::OXID_EVENT_TYPE_TOUCHES_BEGAN
-        | oxid::OXID_EVENT_TYPE_TOUCHES_ENDED
-        | oxid::OXID_EVENT_TYPE_TOUCHES_CANCELLED
-        | oxid::OXID_EVENT_TYPE_TOUCHES_MOVED => {
+        wasm::OXID_EVENT_TYPE_TOUCHES_BEGAN
+        | wasm::OXID_EVENT_TYPE_TOUCHES_ENDED
+        | wasm::OXID_EVENT_TYPE_TOUCHES_CANCELLED
+        | wasm::OXID_EVENT_TYPE_TOUCHES_MOVED => {
             for i in 0..(event.num_touches as usize) {
                 if event.touches[i].changed {
                     event_call!(
@@ -195,25 +193,25 @@ extern "C" fn event(event: *const oxid::oxid_event, user_data: *mut ::std::os::r
                 }
             }
         }
-        oxid::OXID_EVENT_TYPE_QUIT_REQUESTED => {
+        wasm::OXID_EVENT_TYPE_QUIT_REQUESTED => {
             event_call!(data, quit_requested_event);
         }
         #[cfg(not(target_os = "ios"))]
-        oxid::OXID_EVENT_TYPE_RAW_DEVICE => {
+        wasm::OXID_EVENT_TYPE_RAW_DEVICE => {
             event_call!(data, raw_mouse_motion, event.mouse_dx, event.mouse_dy);
         }
         _ => {}
     }
 }
 
-/// Start oxid.
+/// Start oxid::core.
 /// Initialization callback will be called when oxid's Context is ready.
 /// User can take ownership on Context and store it in user Code. Or return it back
 /// to oxid and give oxid ownership on Context.
 ///
 /// Variant wth EventHandler:
 /// ```no_run
-/// # use oxid::*;
+/// # use oxid::core::*;
 /// struct Stage;
 ///
 /// impl EventHandler for Stage {
@@ -221,13 +219,13 @@ extern "C" fn event(event: *const oxid::oxid_event, user_data: *mut ::std::os::r
 ///     fn draw(&mut self, _ctx: &mut Context) {}
 /// }
 /// fn main() {
-///     oxid::start(conf::Conf::default(), |ctx| UserData::owning(Stage, ctx));
+///     oxid::core::start(conf::Conf::default(), |ctx| UserData::owning(Stage, ctx));
 /// }
 /// ```
 ///
 /// Variant wth EventHandlerFree:
 /// ```no_run
-/// # use oxid::*;
+/// # use oxid::core::*;
 /// struct Stage {
 ///     ctx: Context,
 /// }
@@ -236,14 +234,14 @@ extern "C" fn event(event: *const oxid::oxid_event, user_data: *mut ::std::os::r
 ///     fn draw(&mut self) {}
 /// }
 /// fn main() {
-///     oxid::start(conf::Conf::default(), |ctx| UserData::free(Stage { ctx }));
+///     oxid::core::start(conf::Conf::default(), |ctx| UserData::free(Stage { ctx }));
 /// }
 /// ```
 pub fn start<F>(conf: conf::Conf, f: F)
 where
     F: 'static + FnOnce(Context) -> UserData,
 {
-    let mut desc: oxid::oxid_desc = unsafe { std::mem::zeroed() };
+    let mut desc: wasm::oxid_desc = unsafe { std::mem::zeroed() };
 
     let title = CString::new(conf.window_title.as_bytes()).unwrap_or_else(|e| panic!(e));
 
@@ -262,5 +260,5 @@ where
 
     std::mem::forget(user_data);
 
-    unsafe { oxid::oxid_run(&desc as *const _) };
+    unsafe { crate::wasm::oxid_run(&desc as *const _) };
 }
