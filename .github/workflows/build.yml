@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Cache Cargo
         uses: actions/cache@v2
         with:
@@ -18,8 +18,15 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.toml') }}
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - name: Cache rustup
+        id: cache-rustup
+        uses: actions/cache@v3
+        with:
+          path: ~/.rustup
+          key: ${{ runner.os }}-rustup
       - name: Setup rustup toolchain
+        if: steps.cache-rustup.outputs.cache-hit != 'true'
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
